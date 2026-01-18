@@ -187,36 +187,6 @@ func NewServer(es graphql.ExecutableSchema) *handler.Server {
 	return srv
 }
 
-// AuthMiddleware はユーザーIDをコンテキストに追加
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// AuthorizationヘッダーからユーザーIDを抽出
-		auth := r.Header.Get("Authorization")
-		if strings.HasPrefix(auth, "Bearer ") {
-			userID := strings.TrimPrefix(auth, "Bearer ")
-			ctx := WithUserID(r.Context(), userID)
-			r = r.WithContext(ctx)
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-// CORSMiddleware はCORSを許可
-func CORSMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
 // KeepAlive はSSE接続を維持するためのコメントを定期的に送信
 func KeepAlive(w http.ResponseWriter, flusher http.Flusher, ctx context.Context) {
 	ticker := time.NewTicker(15 * time.Second)

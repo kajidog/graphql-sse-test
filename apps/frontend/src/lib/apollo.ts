@@ -13,7 +13,10 @@ import { createClient } from "graphql-sse";
 
 const GRAPHQL_ENDPOINT = "http://localhost:8080/graphql";
 
-// 認証トークンの保持はメモリ上に限定する（リロード時はApp側で復元）
+// 固定の認証トークン（本番ではCognitoトークンを使用）
+const AUTH_TOKEN = "sample-auth-token-12345";
+
+// ログイン済みユーザーIDの保持（リロード時はApp側で復元）
 let currentUserId: string | null = null;
 
 export const setCurrentUserId = (userId: string | null) => {
@@ -22,8 +25,15 @@ export const setCurrentUserId = (userId: string | null) => {
 
 export const getCurrentUserId = () => currentUserId;
 
-const buildAuthHeader = (): Record<string, string> =>
-  currentUserId ? { Authorization: `Bearer ${currentUserId}` } : {};
+const buildAuthHeader = (): Record<string, string> => {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${AUTH_TOKEN}`,
+  };
+  if (currentUserId) {
+    headers["X-User-ID"] = currentUserId;
+  }
+  return headers;
+};
 
 // HTTP Link（クエリ・ミューテーション用）
 const httpLink = new HttpLink({

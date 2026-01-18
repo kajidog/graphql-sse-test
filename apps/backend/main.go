@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/kajidog/graphql-sse-test/apps/backend/graph"
+	"github.com/kajidog/graphql-sse-test/apps/backend/middleware"
 	"github.com/kajidog/graphql-sse-test/apps/backend/server"
 )
 
@@ -17,8 +18,8 @@ func main() {
 	resolver := graph.NewResolver()
 	srv := server.NewServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
-	// 認証 + CORS をまとめて適用
-	handler := server.CORSMiddleware(server.AuthMiddleware(srv))
+	// CORS + 認証ミドルウェアを適用
+	handler := middleware.CORSMiddleware(middleware.AuthMiddleware(srv))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	http.Handle("/graphql", handler)

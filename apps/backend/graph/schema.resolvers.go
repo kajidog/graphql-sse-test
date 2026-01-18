@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kajidog/graphql-sse-test/apps/backend/graph/model"
-	"github.com/kajidog/graphql-sse-test/apps/backend/server"
+	"github.com/kajidog/graphql-sse-test/apps/backend/middleware"
 )
 
 // Login is the resolver for the login field.
@@ -38,7 +38,7 @@ func (r *mutationResolver) Login(ctx context.Context, nickname string) (*model.U
 // SendMessage is the resolver for the sendMessage field.
 func (r *mutationResolver) SendMessage(ctx context.Context, content string) (*model.Message, error) {
 	// コンテキストからユーザーIDを取得し、未認証なら拒否
-	userID, ok := server.UserIDFromContext(ctx)
+	userID, ok := middleware.UserIDFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("unauthorized: user not logged in")
 	}
@@ -76,7 +76,7 @@ func (r *queryResolver) Messages(ctx context.Context) ([]*model.Message, error) 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	// ログイン済みならユーザー情報を返す
-	userID, ok := server.UserIDFromContext(ctx)
+	userID, ok := middleware.UserIDFromContext(ctx)
 	if !ok {
 		return nil, nil
 	}
