@@ -16,14 +16,9 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, nickname string) (*model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	// 既存ユーザーを検索し、同一ニックネームなら再利用
-	for _, u := range r.users {
-		if u.Nickname == nickname {
-			return u, nil
-		}
+	if user, ok := r.Store.GetUserByNickname(nickname); ok {
+		return user, nil
 	}
 
 	// 新規ユーザーを生成して保存
@@ -31,7 +26,7 @@ func (r *mutationResolver) Login(ctx context.Context, nickname string) (*model.U
 		ID:       uuid.New().String(),
 		Nickname: nickname,
 	}
-	r.users[user.ID] = user
+	r.Store.SaveUser(user)
 	return user, nil
 }
 
@@ -43,10 +38,8 @@ func (r *mutationResolver) SendMessage(ctx context.Context, content string) (*mo
 		return nil, fmt.Errorf("unauthorized: user not logged in")
 	}
 
-	r.mu.Lock()
-	user, exists := r.users[userID]
+	user, exists := r.Store.GetUser(userID)
 	if !exists {
-		r.mu.Unlock()
 		return nil, fmt.Errorf("user not found")
 	}
 
@@ -57,20 +50,17 @@ func (r *mutationResolver) SendMessage(ctx context.Context, content string) (*mo
 		Content:   content,
 		CreatedAt: time.Now().Format(time.RFC3339),
 	}
-	r.messages = append(r.messages, msg)
-	r.mu.Unlock()
+	r.Store.SaveMessage(msg)
 
 	// すべてのサブスクライバーへ配信
-	r.Broadcast(msg)
+	r.PubSub.Publish(msg)
 
 	return msg, nil
 }
 
 // Messages is the resolver for the messages field.
 func (r *queryResolver) Messages(ctx context.Context) ([]*model.Message, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.messages, nil
+	return r.Store.GetMessages(), nil
 }
 
 // Me is the resolver for the me field.
@@ -81,20 +71,19 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 		return nil, nil
 	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.users[userID], nil
+	user, _ := r.Store.GetUser(userID)
+	return user, nil
 }
 
 // MessageAdded is the resolver for the messageAdded field.
 func (r *subscriptionResolver) MessageAdded(ctx context.Context) (<-chan *model.Message, error) {
 	id := uuid.New().String()
-	ch := r.Subscribe(id)
+	ch := r.PubSub.Subscribe(id)
 
 	// コンテキストがキャンセルされたらチャンネルを閉じる
 	go func() {
 		<-ctx.Done()
-		r.Unsubscribe(id)
+		r.PubSub.Unsubscribe(id)
 	}()
 
 	return ch, nil
