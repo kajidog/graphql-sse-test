@@ -1,0 +1,49 @@
+query GetMessages {
+  messages {
+    id
+    user {
+      id
+      nickname
+    }
+    content
+    createdAt
+  }
+}
+
+query GetMe {
+  me {
+    id
+    nickname
+  }
+}
+
+mutation Login($nickname: String!) {
+  login(nickname: $nickname) {
+    id
+    nickname
+  }
+}
+
+mutation SendMessage($content: String!) {
+  sendMessage(content: $content) {
+    id
+    user {
+      id
+      nickname
+    }
+    content
+    createdAt
+  }
+}
+
+subscription OnMessageAdded {
+  messageAdded {
+    id
+    user {
+      id
+      nickname
+    }
+    content
+    createdAt
+  }
+}

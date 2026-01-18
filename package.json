@@ -1,0 +1,10 @@
+{
+  "name": "graphql-sse-test",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "cd apps/backend && go run .",
+    "codegen": "pnpm --filter frontend codegen",
+    "build": "pnpm --filter frontend build"
+  }
+}

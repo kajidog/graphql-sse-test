@@ -1,0 +1,23 @@
+node_modules/
+**/node_modules/
+
+dist/
+build/
+coverage/
+*.log
+pnpm-debug.log*
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+.eslintcache
+.turbo/
+.cache/
+
+# Go backend binaries
+apps/backend/backend
+apps/backend/backend_server
+apps/backend/server/backend
