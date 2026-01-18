@@ -1,19 +1,14 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -170,35 +165,4 @@ func sendSSEGraphQLErrors(w http.ResponseWriter, flusher http.Flusher, errors gq
 func writeSSEEvent(w http.ResponseWriter, flusher http.Flusher, event string, data []byte) {
 	fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, data)
 	flusher.Flush()
-}
-
-// NewServer はGraphQLサーバーを作成
-func NewServer(es graphql.ExecutableSchema) *handler.Server {
-	srv := handler.New(es)
-
-	// SSEトランスポートを追加
-	srv.AddTransport(SSETransport{})
-	srv.AddTransport(transport.Options{})
-	srv.AddTransport(transport.POST{})
-
-	// Introspection有効
-	srv.Use(extension.Introspection{})
-
-	return srv
-}
-
-// KeepAlive はSSE接続を維持するためのコメントを定期的に送信
-func KeepAlive(w http.ResponseWriter, flusher http.Flusher, ctx context.Context) {
-	ticker := time.NewTicker(15 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			fmt.Fprintf(w, ": keep-alive\n\n")
-			flusher.Flush()
-		case <-ctx.Done():
-			return
-		}
-	}
 }
