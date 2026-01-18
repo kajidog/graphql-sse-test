@@ -4,7 +4,9 @@
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "cd apps/backend && go run .",
-    "codegen": "pnpm --filter frontend codegen",
+    "generate": "pnpm run generate:backend && pnpm run generate:frontend",
+    "generate:backend": "cd apps/backend && go generate ./...",
+    "generate:frontend": "pnpm --filter frontend codegen",
     "build": "pnpm --filter frontend build"
   }
 }

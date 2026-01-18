@@ -10,18 +10,23 @@ import (
 	"github.com/kajidog/graphql-sse-test/apps/backend/middleware"
 	"github.com/kajidog/graphql-sse-test/apps/backend/pubsub"
 	"github.com/kajidog/graphql-sse-test/apps/backend/server"
+	"github.com/kajidog/graphql-sse-test/apps/backend/service"
 	"github.com/kajidog/graphql-sse-test/apps/backend/store"
 )
 
 const defaultPort = "8080"
 
 func main() {
-	// 依存関係を初期化
+	// インフラ層を初期化
 	memoryStore := store.NewMemoryStore()
 	memoryPubSub := pubsub.NewMemoryPubSub()
 
+	// サービス層を初期化
+	userService := service.NewUserService(memoryStore)
+	messageService := service.NewMessageService(memoryStore, memoryPubSub)
+
 	// GraphQLリゾルバーとサーバーを初期化
-	resolver := graph.NewResolver(memoryStore, memoryPubSub)
+	resolver := graph.NewResolver(userService, messageService)
 	srv := server.NewServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
 	// CORS + 認証ミドルウェアを適用

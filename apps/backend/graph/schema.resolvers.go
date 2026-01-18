@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/kajidog/graphql-sse-test/apps/backend/graph/model"
@@ -16,74 +15,41 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, nickname string) (*model.User, error) {
-	// 既存ユーザーを検索し、同一ニックネームなら再利用
-	if user, ok := r.Store.GetUserByNickname(nickname); ok {
-		return user, nil
-	}
-
-	// 新規ユーザーを生成して保存
-	user := &model.User{
-		ID:       uuid.New().String(),
-		Nickname: nickname,
-	}
-	r.Store.SaveUser(user)
-	return user, nil
+	return r.UserService.Login(nickname)
 }
 
 // SendMessage is the resolver for the sendMessage field.
 func (r *mutationResolver) SendMessage(ctx context.Context, content string) (*model.Message, error) {
-	// コンテキストからユーザーIDを取得し、未認証なら拒否
 	userID, ok := middleware.UserIDFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("unauthorized: user not logged in")
 	}
-
-	user, exists := r.Store.GetUser(userID)
-	if !exists {
-		return nil, fmt.Errorf("user not found")
-	}
-
-	// 送信者と内容を基にメッセージを作成
-	msg := &model.Message{
-		ID:        uuid.New().String(),
-		User:      user,
-		Content:   content,
-		CreatedAt: time.Now().Format(time.RFC3339),
-	}
-	r.Store.SaveMessage(msg)
-
-	// すべてのサブスクライバーへ配信
-	r.PubSub.Publish(msg)
-
-	return msg, nil
+	return r.MessageService.SendMessage(userID, content)
 }
 
 // Messages is the resolver for the messages field.
 func (r *queryResolver) Messages(ctx context.Context) ([]*model.Message, error) {
-	return r.Store.GetMessages(), nil
+	return r.MessageService.GetMessages(), nil
 }
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	// ログイン済みならユーザー情報を返す
 	userID, ok := middleware.UserIDFromContext(ctx)
 	if !ok {
 		return nil, nil
 	}
-
-	user, _ := r.Store.GetUser(userID)
+	user, _ := r.UserService.GetUser(userID)
 	return user, nil
 }
 
 // MessageAdded is the resolver for the messageAdded field.
 func (r *subscriptionResolver) MessageAdded(ctx context.Context) (<-chan *model.Message, error) {
 	id := uuid.New().String()
-	ch := r.PubSub.Subscribe(id)
+	ch := r.MessageService.Subscribe(id)
 
-	// コンテキストがキャンセルされたらチャンネルを閉じる
 	go func() {
 		<-ctx.Done()
-		r.PubSub.Unsubscribe(id)
+		r.MessageService.Unsubscribe(id)
 	}()
 
 	return ch, nil

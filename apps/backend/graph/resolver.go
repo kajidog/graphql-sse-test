@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"github.com/kajidog/graphql-sse-test/apps/backend/pubsub"
-	"github.com/kajidog/graphql-sse-test/apps/backend/store"
+	"github.com/kajidog/graphql-sse-test/apps/backend/service"
 )
 
 // This file will not be regenerated automatically.
@@ -10,13 +9,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Store  store.Store
-	PubSub pubsub.PubSub
+	UserService    service.UserService
+	MessageService service.MessageService
 }
 
-func NewResolver(s store.Store, ps pubsub.PubSub) *Resolver {
+func NewResolver(us service.UserService, ms service.MessageService) *Resolver {
 	return &Resolver{
-		Store:  s,
-		PubSub: ps,
+		UserService:    us,
+		MessageService: ms,
 	}
 }
