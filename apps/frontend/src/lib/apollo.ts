@@ -64,10 +64,11 @@ const sseClient = createClient({
   headers: () => ({
     ...buildAuthHeader(),
   }),
-  // 1本の永続接続を共有し、アプリ全体の接続状態を1つで扱う
-  singleConnection: true,
-  // 最初の subscription 開始時に接続（ログイン前は接続しない）
-  lazy: true,
+  // distinct connections モード（デフォルト）を維持する。
+  // バックエンドの SSE トランスポートはリクエストボディの GraphQL クエリを
+  // 読む方式のみ対応しており、single connection の予約プロトコルは未対応。
+  // このアプリの subscription は messageAdded 1本なので、その1接続の状態が
+  // そのままアプリの接続状態になる。
   // チャットは常時接続したいので、回数制限で諦めさせない
   retryAttempts: Infinity,
   // 指数バックオフ + ジッター（上限30秒）
