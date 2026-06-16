@@ -5,23 +5,7 @@ import {
     useSendMessage,
     useMessageSubscription,
 } from "@/features/chat";
-import {
-    useConnectionStatus,
-    onReconnected,
-    type ConnectionStatus,
-} from "@/lib/connectionStatus";
 import styles from "./Chat.module.css";
-
-// 接続状態ごとの表示内容（ラベルとCSSクラス）
-const CONNECTION_DISPLAY: Record<
-    ConnectionStatus,
-    { label: string; className: string }
-> = {
-    connecting: { label: "接続中…", className: "statusConnecting" },
-    connected: { label: "接続済み", className: "statusConnected" },
-    reconnecting: { label: "再接続中…", className: "statusReconnecting" },
-    disconnected: { label: "切断", className: "statusDisconnected" },
-};
 
 interface ChatProps {
     userId: string;
@@ -54,22 +38,11 @@ export function Chat({ userId, nickname, onLogout }: ChatProps) {
     const prevMessagesLengthRef = useRef(0);
 
     // Apollo Client hooks
-    const { messages, loading: messagesLoading, error: messagesError, refetch } = useMessages();
+    const { messages, loading: messagesLoading, error: messagesError } = useMessages();
     const { sendMessage, loading: sending, error: sendError } = useSendMessage();
 
     // SSE サブスクリプション（Apollo キャッシュを更新）
     useMessageSubscription();
-
-    // SSE 接続状態（接続中／再接続中／切断 をヘッダーに表示）
-    const connectionStatus = useConnectionStatus();
-    const connectionDisplay = CONNECTION_DISPLAY[connectionStatus];
-
-    // 再接続が成功したら、切断中に取りこぼしたメッセージを取得し直す
-    useEffect(() => {
-        return onReconnected(() => {
-            refetch();
-        });
-    }, [refetch]);
 
     // セッションエラーを検知したら自動ログアウト
     useEffect(() => {
@@ -117,12 +90,6 @@ export function Chat({ userId, nickname, onLogout }: ChatProps) {
             <header className={styles.header}>
                 <h1 className={styles.headerTitle}>💬 チャットルーム</h1>
                 <div className={styles.headerUser}>
-                    <span
-                        className={`${styles.connectionStatus} ${styles[connectionDisplay.className]}`}
-                    >
-                        <span className={styles.connectionDot} />
-                        {connectionDisplay.label}
-                    </span>
                     <span className={styles.userBadge}>👤 {nickname}</span>
                     <button className={styles.logoutButton} onClick={onLogout}>
                         ログアウト
