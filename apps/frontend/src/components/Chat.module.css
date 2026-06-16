@@ -28,6 +28,53 @@
     gap: 12px;
 }
 
+.connectionStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.connectionDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.statusConnected {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.statusConnecting,
+.statusReconnecting {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* 再接続中はドットを点滅させて「処理中」を伝える */
+.statusReconnecting .connectionDot {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.statusDisconnected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
 .userBadge {
     display: flex;
     align-items: center;
