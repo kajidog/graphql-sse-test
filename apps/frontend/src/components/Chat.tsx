@@ -4,8 +4,17 @@ import {
     useMessages,
     useSendMessage,
     useMessageSubscription,
+    useConnectionStatus,
 } from "@/features/chat";
+import type { ConnectionStatus } from "@/features/chat";
 import styles from "./Chat.module.css";
+
+// 接続状態ごとの表示内容
+const CONNECTION_LABEL: Record<ConnectionStatus, string> = {
+    connecting: "接続中…",
+    connected: "接続済み",
+    disconnected: "切断されました",
+};
 
 interface ChatProps {
     userId: string;
@@ -42,7 +51,9 @@ export function Chat({ userId, nickname, onLogout }: ChatProps) {
     const { sendMessage, loading: sending, error: sendError } = useSendMessage();
 
     // SSE サブスクリプション（Apollo キャッシュを更新）
-    useMessageSubscription();
+    const { reconnect } = useMessageSubscription();
+    // 接続状態（connecting / connected / disconnected）
+    const connectionStatus = useConnectionStatus();
 
     // セッションエラーを検知したら自動ログアウト
     useEffect(() => {
@@ -90,6 +101,21 @@ export function Chat({ userId, nickname, onLogout }: ChatProps) {
             <header className={styles.header}>
                 <h1 className={styles.headerTitle}>💬 チャットルーム</h1>
                 <div className={styles.headerUser}>
+                    <span
+                        className={`${styles.connectionBadge} ${styles[connectionStatus]}`}
+                        title={CONNECTION_LABEL[connectionStatus]}
+                    >
+                        <span className={styles.connectionDot} />
+                        {CONNECTION_LABEL[connectionStatus]}
+                    </span>
+                    {connectionStatus === "disconnected" && (
+                        <button
+                            className={styles.reconnectButton}
+                            onClick={reconnect}
+                        >
+                            再接続
+                        </button>
+                    )}
                     <span className={styles.userBadge}>👤 {nickname}</span>
                     <button className={styles.logoutButton} onClick={onLogout}>
                         ログアウト

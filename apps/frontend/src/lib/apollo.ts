@@ -10,6 +10,7 @@ import type { FetchResult, Operation, NextLink } from "@apollo/client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { print } from "graphql";
 import { createClient } from "graphql-sse";
+import { setConnectionStatus } from "./connectionStatus";
 
 const GRAPHQL_ENDPOINT = "http://localhost:8080/graphql";
 
@@ -60,6 +61,18 @@ const sseClient = createClient({
   headers: () => ({
     ...buildAuthHeader(),
   }),
+  // 再接続（リトライ）は hooks 側で制御するため、
+  // トランスポート層の自動リトライは無効化する。
+  // こうすることで切断が即座に onError として React まで届き、
+  // バックオフ・UI 表示・手動再接続をすべて hook で一元管理できる。
+  retryAttempts: 0,
+  // 接続ライフサイクルを外部ストアへ橋渡しする。
+  // "connecting" / "connected" はストリームが実際に開いたかどうかの信号で、
+  // メッセージの受信有無とは独立しているため UI 状態の正確なソースになる。
+  on: {
+    connecting: () => setConnectionStatus("connecting"),
+    connected: () => setConnectionStatus("connected"),
+  },
 });
 
 // SSE Link for Subscriptions

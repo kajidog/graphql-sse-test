@@ -1,6 +1,8 @@
 export { useMessages } from "./hooks/useMessages";
 export { useSendMessage } from "./hooks/useSendMessage";
 export { useMessageSubscription } from "./hooks/useMessageSubscription";
+export { useConnectionStatus } from "./hooks/useConnectionStatus";
+export type { ConnectionStatus } from "@/lib/connectionStatus";
 export type {
   ChatMessage,
   UseMessagesReturn,

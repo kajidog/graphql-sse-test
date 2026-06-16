@@ -40,6 +40,75 @@
     font-size: 0.875rem;
 }
 
+.connectionBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    user-select: none;
+}
+
+.connectionDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* 接続済み: 緑 */
+.connected {
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
+}
+
+/* 接続中: 黄（点滅で「処理中」を表現） */
+.connecting {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+}
+
+.connecting .connectionDot {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* 切断: 赤 */
+.disconnected {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.reconnectButton {
+    padding: 6px 12px;
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reconnectButton:hover {
+    background: #667eea;
+    color: white;
+}
+
 .logoutButton {
     padding: 8px 16px;
     background: transparent;
