@@ -19,5 +19,8 @@ func NewServer(es graphql.ExecutableSchema) *handler.Server {
 	// Introspection有効
 	srv.Use(extension.Introspection{})
 
+	// リゾルバー単位の実行ログ
+	srv.AroundFields(FieldLogger)
+
 	return srv
 }
