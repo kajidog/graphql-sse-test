@@ -10,6 +10,10 @@ import type { FetchResult, Operation, NextLink } from "@apollo/client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { print } from "graphql";
 import { createClient } from "graphql-sse";
+import {
+  setConnectionStatus,
+  notifyReconnected,
+} from "./connectionStatus";
 
 const GRAPHQL_ENDPOINT = "http://localhost:8080/graphql";
 
@@ -60,6 +64,32 @@ const sseClient = createClient({
   headers: () => ({
     ...buildAuthHeader(),
   }),
+  // distinct connections モード（デフォルト）を維持する。
+  // バックエンドの SSE トランスポートはリクエストボディの GraphQL クエリを
+  // 読む方式のみ対応しており、single connection の予約プロトコルは未対応。
+  // このアプリの subscription は messageAdded 1本なので、その1接続の状態が
+  // そのままアプリの接続状態になる。
+  // チャットは常時接続したいので、回数制限で諦めさせない
+  retryAttempts: Infinity,
+  // 指数バックオフ + ジッター（上限30秒）
+  retry: async (retries) => {
+    const backoff = Math.min(1000 * 2 ** retries, 30_000);
+    const jitter = Math.random() * 1000;
+    await new Promise((resolve) => setTimeout(resolve, backoff + jitter));
+  },
+  // 接続のライフサイクルを UI 向けの状態へ反映する
+  on: {
+    connecting: (reconnecting) => {
+      setConnectionStatus(reconnecting ? "reconnecting" : "connecting");
+    },
+    connected: (reconnected) => {
+      setConnectionStatus("connected");
+      // 再接続成功時は切断中の取りこぼしを埋めるため通知する
+      if (reconnected) {
+        notifyReconnected();
+      }
+    },
+  },
 });
 
 // SSE Link for Subscriptions
@@ -80,7 +110,11 @@ class SSELink extends ApolloLink {
         },
         {
           next: (data) => observer.next(data as FetchResult),
-          error: (err) => observer.error(err),
+          error: (err) => {
+            // ここに来るのは致命的エラー or リトライ枯渇（＝恒久切断）
+            setConnectionStatus("disconnected");
+            observer.error(err);
+          },
           complete: () => observer.complete(),
         }
       );
