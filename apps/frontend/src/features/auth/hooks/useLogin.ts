@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { useLoginMutation } from "@/api/chat/generated";
+import { useMutation } from "@apollo/client";
+import { LoginDocument } from "../graphql/auth.chat";
 import type { AuthUser, UseLoginOptions, UseLoginReturn } from "../types";
 
 export function useLogin(options?: UseLoginOptions): UseLoginReturn {
-  const [loginMutation, { loading, error }] = useLoginMutation();
+  const [loginMutation, { loading, error }] = useMutation(LoginDocument);
 
   const login = useCallback(
     async (nickname: string): Promise<AuthUser> => {

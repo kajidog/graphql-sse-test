@@ -1,11 +1,11 @@
-import { useApolloClient } from "@apollo/client";
-import { useOnMessageAddedSubscription } from "@/api/chat/generated";
+import { useApolloClient, useSubscription } from "@apollo/client";
+import { OnMessageAddedDocument } from "../graphql/chat.chat";
 import { appendMessageToCache } from "../cache";
 
 export function useMessageSubscription(): void {
   const client = useApolloClient();
 
-  useOnMessageAddedSubscription({
+  useSubscription(OnMessageAddedDocument, {
     fetchPolicy: "no-cache",
     onData: ({ data: subscriptionData }) => {
       if (subscriptionData.error) {

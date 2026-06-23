@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { useGetMessagesQuery } from "@/api/chat/generated";
+import { useQuery } from "@apollo/client";
+import { GetMessagesDocument } from "../graphql/chat.chat";
 import type { ChatMessage, UseMessagesReturn } from "../types";
 
 export function useMessages(): UseMessagesReturn {
-  const { data, loading, error, refetch } = useGetMessagesQuery({
+  const { data, loading, error, refetch } = useQuery(GetMessagesDocument, {
     fetchPolicy: "cache-and-network",
   });
 
