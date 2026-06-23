@@ -1,14 +1,13 @@
 import { useCallback } from "react";
-import {
-  useSendMessageMutation,
-} from "@/api/chat/generated";
+import { useMutation } from "@apollo/client";
+import { SendMessageDocument } from "../graphql/chat.chat";
 import type { ChatMessage, UseSendMessageOptions, UseSendMessageReturn } from "../types";
 import { appendMessageToCache } from "../cache";
 
 export function useSendMessage(
   options?: UseSendMessageOptions
 ): UseSendMessageReturn {
-  const [sendMessageMutation, { loading, error }] = useSendMessageMutation({
+  const [sendMessageMutation, { loading, error }] = useMutation(SendMessageDocument, {
     update: (cache, { data }) => {
       if (!data?.sendMessage) return;
       // キャッシュに存在する場合のみ、重複を避けて追加

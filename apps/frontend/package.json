@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "graphql": "^16.9.0",
     "graphql-sse": "^2.5.3",
     "react": "^19.2.0",
@@ -21,9 +22,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/client-preset": "^6.0.1",
     "@graphql-codegen/typescript": "^4.0.9",
-    "@graphql-codegen/typescript-operations": "^4.2.3",
-    "@graphql-codegen/typescript-react-apollo": "^4.3.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

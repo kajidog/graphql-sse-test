@@ -1,5 +1,3 @@
-export type { User } from "@/api/chat/generated";
-
 export interface AuthUser {
   id: string;
   nickname: string;
