@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useLoginMutation } from "@/graphql/generated";
+import { useLoginMutation } from "@/api/chat/generated";
 import type { AuthUser, UseLoginOptions, UseLoginReturn } from "../types";
 
 export function useLogin(options?: UseLoginOptions): UseLoginReturn {

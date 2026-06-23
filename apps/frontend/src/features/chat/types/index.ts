@@ -1,4 +1,4 @@
-export type { Message, User } from "@/graphql/generated";
+export type { Message, User } from "@/api/chat/generated";
 
 export interface ChatMessage {
   id: string;

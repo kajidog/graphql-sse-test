@@ -1,5 +1,5 @@
 import { useApolloClient } from "@apollo/client";
-import { useOnMessageAddedSubscription } from "@/graphql/generated";
+import { useOnMessageAddedSubscription } from "@/api/chat/generated";
 import { appendMessageToCache } from "../cache";
 
 export function useMessageSubscription(): void {
