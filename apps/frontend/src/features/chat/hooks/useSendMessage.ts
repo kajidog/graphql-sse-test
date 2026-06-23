@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import {
   useSendMessageMutation,
-} from "@/graphql/generated";
+} from "@/api/chat/generated";
 import type { ChatMessage, UseSendMessageOptions, UseSendMessageReturn } from "../types";
 import { appendMessageToCache } from "../cache";
 

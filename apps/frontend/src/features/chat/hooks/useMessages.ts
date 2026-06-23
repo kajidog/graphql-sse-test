@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useGetMessagesQuery } from "@/graphql/generated";
+import { useGetMessagesQuery } from "@/api/chat/generated";
 import type { ChatMessage, UseMessagesReturn } from "../types";
 
 export function useMessages(): UseMessagesReturn {

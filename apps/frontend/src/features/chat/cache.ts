@@ -1,5 +1,5 @@
 import type { ApolloCache } from "@apollo/client";
-import { GetMessagesDocument, type GetMessagesQuery } from "@/graphql/generated";
+import { GetMessagesDocument, type GetMessagesQuery } from "@/api/chat/generated";
 
 type MessageItem = GetMessagesQuery["messages"][number];
 

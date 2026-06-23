@@ -10,20 +10,6 @@ query GetMessages {
   }
 }
 
-query GetMe {
-  me {
-    id
-    nickname
-  }
-}
-
-mutation Login($nickname: String!) {
-  login(nickname: $nickname) {
-    id
-    nickname
-  }
-}
-
 mutation SendMessage($content: String!) {
   sendMessage(content: $content) {
     id
